@@ -1,0 +1,31 @@
+{
+  "development": {
+    "username": "root",
+    "password": "",
+    "database": "menu_ai_db_dev",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "menu_ai_db_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "cP6EVeT3HX",
+    "password": "SA+faTa788Ub6Zg",
+    "database": "menu_ai_db",
+    "host": "kmzerowebmarketing.com",
+    "dialect": "mysql",
+    "logging": false,
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
+  }
+}
