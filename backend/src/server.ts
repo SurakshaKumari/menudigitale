@@ -1,10 +1,12 @@
 // backend/src/server.ts
-import express from 'express';
-import cors from 'cors';
 import helmet from 'helmet';
-import compression from 'compression';
-import dotenv from 'dotenv';
 import { sequelize } from './config/database';
+
+// FIX THESE IMPORTS:
+import express = require('express');  // Change this line
+import cors = require('cors');        // Change this line  
+import compression = require('compression');  // Change this line
+import dotenv = require('dotenv');    // Change this line
 
 dotenv.config();
 
@@ -27,7 +29,7 @@ sequelize.authenticate()
   .catch(err => console.error('❌ Database Connection Error:', err));
 
 // Routes
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (req: express.Request, res: express.Response) => {
   res.json({ 
     status: 'OK', 
     message: 'Menu Digitale API is running',
