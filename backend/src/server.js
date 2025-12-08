@@ -113,7 +113,7 @@ app.get("/api/health", async (req, res) => {
 
 // Catch-all route to serve frontend (MUST be after all API routes)
 if (staticPath) {
-  app.get("*", (req, res) => {
+  app.get("/*", (req, res) => {
     const indexPath = path.join(staticPath, "index.html");
     const fs = require("fs");
     
