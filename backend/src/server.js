@@ -137,7 +137,7 @@ if (staticPath) {
   });
 } else {
   // If no frontend build found, show info message
-  app.get("*", (req, res) => {
+  app.get("/*", (req, res) => {
     if (req.path === "/" || req.path === "/api") {
       res.json({ 
         status: "running", 
