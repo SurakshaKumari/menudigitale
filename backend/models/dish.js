@@ -1,27 +1,68 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class Dish extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      // define association here
+      Dish.belongsTo(models.Category, {
+        foreignKey: 'categoryId',
+        as: 'category'
+      });
+      Dish.belongsToMany(models.Allergen, {
+        through: 'DishAllergens',
+        foreignKey: 'dishId',
+        as: 'allergens'
+      });
     }
   }
+
   Dish.init({
-    name: DataTypes.STRING,
-    description: DataTypes.TEXT,
-    price: DataTypes.DECIMAL,
-    imageUrl: DataTypes.STRING,
-    categoryId: DataTypes.INTEGER
+    categoryId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      field: 'category_id'
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    price: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false
+    },
+    imageUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'image_url'
+    },
+    order: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    isAvailable: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      field: 'is_available'
+    },
+    preparationTime: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: 'preparation_time'
+    },
+    calories: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    }
   }, {
     sequelize,
     modelName: 'Dish',
+    tableName: 'dishes',
+    timestamps: true
   });
+
   return Dish;
 };

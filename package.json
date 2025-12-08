@@ -7,9 +7,14 @@
     "build": "cd backend && npm run build",
     "heroku-postbuild": "cd backend && npm install && npm run build"
   },
-  "cacheDirectories": ["backend/node_modules"],
+  "cacheDirectories": [
+    "backend/node_modules"
+  ],
   "engines": {
     "node": "18.x",
     "npm": "9.x"
+  },
+  "dependencies": {
+    "lucide-react": "^0.556.0"
   }
 }
