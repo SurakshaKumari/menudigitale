@@ -2,10 +2,11 @@
   "name": "menudigitale",
   "version": "1.0.0",
   "private": true,
+  
   "scripts": {
-    "start": "cd backend && npm start",
     "build": "cd backend && npm run build",
-    "heroku-postbuild": "cd backend && npm install && npm run build"
+        "heroku-postbuild": "cd backend && npm install && cd ../frontend && npm install && npm run build",
+    "start": "cd backend && npm start"
   },
   "cacheDirectories": [
     "backend/node_modules"

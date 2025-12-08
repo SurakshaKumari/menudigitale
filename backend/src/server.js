@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const compression = require("compression");
+const path = require("path");
 const { Sequelize } = require("sequelize");
 require("dotenv").config();
 
@@ -31,7 +32,9 @@ const sequelize = new Sequelize(
 );
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false, // Adjust based on your frontend needs
+}));
 app.use(compression());
 app.use(cors({
   origin: process.env.FRONTEND_URL || "*",
@@ -39,6 +42,31 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from frontend build
+// Try multiple possible frontend build locations
+const frontendPaths = [
+  path.join(__dirname, "../../frontend/build"),      // React/Vue build
+  path.join(__dirname, "../../frontend/dist"),       // Vue/Angular dist
+  path.join(__dirname, "../../frontend/public"),     // Public folder
+  path.join(__dirname, "../public"),                 // Backend public folder
+];
+
+// Use the first existing frontend build path
+let staticPath = null;
+for (const frontendPath of frontendPaths) {
+  try {
+    const fs = require("fs");
+    if (fs.existsSync(frontendPath)) {
+      staticPath = frontendPath;
+      console.log(`📁 Serving frontend from: ${frontendPath}`);
+      app.use(express.static(frontendPath));
+      break;
+    }
+  } catch (error) {
+    // Continue to next path
+  }
+}
 
 // Test database connection on startup
 sequelize.authenticate()
@@ -48,8 +76,8 @@ sequelize.authenticate()
     console.log('⚠️ App will run without database connection');
   });
 
-// Routes
-app.get("/", (req, res) => {
+// API Routes (these should come before the catch-all route)
+app.get("/api/status", (req, res) => {
   res.json({ 
     status: "OK", 
     message: "Menu Digitale API is running",
@@ -83,6 +111,51 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
+// Catch-all route to serve frontend (MUST be after all API routes)
+if (staticPath) {
+  app.get("*", (req, res) => {
+    const indexPath = path.join(staticPath, "index.html");
+    const fs = require("fs");
+    
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      // If no index.html found, check for other HTML files
+      const htmlFiles = fs.readdirSync(staticPath).filter(file => file.endsWith('.html'));
+      if (htmlFiles.length > 0) {
+        res.sendFile(path.join(staticPath, htmlFiles[0]));
+      } else {
+        // If no HTML files, return API info
+        res.json({
+          status: "running",
+          message: "Backend API is running but frontend files not found",
+          frontendExpectedAt: staticPath,
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+  });
+} else {
+  // If no frontend build found, show info message
+  app.get("*", (req, res) => {
+    if (req.path === "/" || req.path === "/api") {
+      res.json({ 
+        status: "running", 
+        message: "Menu Digitale Backend API is running",
+        timestamp: new Date().toISOString(),
+        note: "Frontend files not found. Check if frontend is built and placed correctly.",
+        frontendExpectedPaths: frontendPaths.map(p => path.relative(__dirname, p))
+      });
+    } else {
+      res.status(404).json({ 
+        status: "error", 
+        message: "Route not found",
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+}
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -98,6 +171,12 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📁 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`🗄️ Database: ${process.env.DB_HOST}`);
+  if (staticPath) {
+    console.log(`🌐 Frontend being served from: ${path.relative(__dirname, staticPath)}`);
+  } else {
+    console.log(`⚠️ No frontend build found. Checking paths:`);
+    frontendPaths.forEach(p => console.log(`   - ${path.relative(__dirname, p)}`));
+  }
 });
 
 module.exports = app;
