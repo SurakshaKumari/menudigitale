@@ -4,6 +4,7 @@ import Layout from './components/layout/Layout'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import NotFound from './pages/NotFound'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   return (
@@ -11,10 +12,15 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            {/* Add more routes here */}
+          
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Dashboard />} />
+              {/* Add more protected routes here */}
+            </Route>
           </Route>
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
