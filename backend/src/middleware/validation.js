@@ -1,71 +1,59 @@
-const { body, validationResult } = require('express-validator');
-
-const validateRegister = [
-  body('email')
-    .isEmail()
-    .withMessage('Please enter a valid email address')
-    .normalizeEmail(),
-  body('password')
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters long'),
-  body('name')
-    .notEmpty()
-    .withMessage('Name is required')
-    .trim(),
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array()
-      });
-    }
-    next();
+// middleware/validation.js
+const validateRegister = (req, res, next) => {
+  const { email, password, name } = req.body;
+  
+  const errors = [];
+  
+  // Email validation
+  if (!email || !email.trim()) {
+    errors.push('Email is required');
+  } else if (!/\S+@\S+\.\S+/.test(email)) {
+    errors.push('Please enter a valid email address');
   }
-];
-
-const validateLogin = [
-  body('email')
-    .isEmail()
-    .withMessage('Please enter a valid email address')
-    .normalizeEmail(),
-  body('password')
-    .notEmpty()
-    .withMessage('Password is required'),
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array()
-      });
-    }
-    next();
+  
+  // Password validation
+  if (!password || !password.trim()) {
+    errors.push('Password is required');
+  } else if (password.length < 6) {
+    errors.push('Password must be at least 6 characters long');
   }
-];
-
-const validateMenu = [
-  body('title')
-    .notEmpty()
-    .withMessage('Menu title is required')
-    .trim(),
-  body('restaurantId')
-    .isInt()
-    .withMessage('Restaurant ID must be a number'),
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array()
-      });
-    }
-    next();
+  
+  // Name validation
+  if (!name || !name.trim()) {
+    errors.push('Name is required');
   }
-];
-
-module.exports = {
-  validateRegister,
-  validateLogin,
-  validateMenu
+  
+  if (errors.length > 0) {
+    return res.status(400).json({
+      success: false,
+      error: errors.join(', ')
+    });
+  }
+  
+  next();
 };
+
+const validateLogin = (req, res, next) => {
+  const { email, password } = req.body;
+  
+  const errors = [];
+  
+  if (!email || !email.trim()) {
+    errors.push('Email is required');
+  }
+  
+  if (!password || !password.trim()) {
+    errors.push('Password is required');
+  }
+  
+  if (errors.length > 0) {
+    return res.status(400).json({
+      success: false,
+      error: errors.join(', ')
+    });
+  }
+  
+  next();
+};
+
+module.exports = { validateRegister, validateLogin };

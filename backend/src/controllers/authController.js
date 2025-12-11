@@ -1,12 +1,20 @@
+// controllers/authController.js
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const db = require('../../models');
 
 const authController = {
+
   async register(req, res) {
     try {
       const { email, password, name, role, phone } = req.body;
+      console.log("Register attempt for:", email);
 
       // Check if user exists
-      const existingUser = await db.User.findOne({ where: { email } });
+      const existingUser = await db.User.findOne({ 
+        where: { email }
+      });
+      
       if (existingUser) {
         return res.status(400).json({
           success: false,
@@ -48,9 +56,24 @@ const authController = {
     try {
       const { email, password } = req.body;
 
-      // Find user
-      const user = await db.User.findOne({ where: { email } });
+      console.log('🔐 Login attempt for:', email);
+
+      // Input validation
+      if (!email || !password) {
+        return res.status(400).json({
+          success: false,
+          error: 'Email and password are required'
+        });
+      }
+
+      // Find user in database - FIXED: use db.User
+      const user = await db.User.findOne({ 
+        where: { email },
+        attributes: ['id', 'email', 'password', 'name', 'role', 'restaurantId', 'lastLogin']
+      });
+      
       if (!user) {
+        console.log('❌ User not found:', email);
         return res.status(401).json({
           success: false,
           error: 'Invalid email or password'
@@ -58,8 +81,10 @@ const authController = {
       }
 
       // Check password
-      const isValidPassword = await user.checkPassword(password);
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      
       if (!isValidPassword) {
+        console.log('❌ Invalid password for:', email);
         return res.status(401).json({
           success: false,
           error: 'Invalid email or password'
@@ -70,19 +95,35 @@ const authController = {
       user.lastLogin = new Date();
       await user.save();
 
-      // Generate token
+      // Generate token using the model's method
       const token = user.generateToken();
+
+      console.log('✅ Token generated for user:', user.email);
+
+      // Return user data without password
+      const userResponse = user.toSafeObject();
+      userResponse.lastLogin = user.lastLogin;
 
       res.json({
         success: true,
         message: 'Login successful',
         data: {
-          user: user.toSafeObject(),
+          user: userResponse,
           token
         }
       });
+
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('🔥 Login error:', error);
+      
+      // Handle specific errors
+      if (error.name === 'SequelizeConnectionError') {
+        return res.status(503).json({
+          success: false,
+          error: 'Database connection error. Please try again later.'
+        });
+      }
+      
       res.status(500).json({
         success: false,
         error: 'Login failed. Please try again.'
@@ -92,7 +133,7 @@ const authController = {
 
   async getProfile(req, res) {
     try {
-      const user = await db.User.findByPk(req.user.id, {
+      const user = await db.User.findByPk(req.userId, {
         attributes: { exclude: ['password'] }
       });
 
@@ -105,34 +146,57 @@ const authController = {
 
       res.json({
         success: true,
-        data: user
+        data: { user }
       });
+
     } catch (error) {
       console.error('Get profile error:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to get profile'
+        error: 'Failed to fetch profile'
       });
     }
   },
 
   async updateProfile(req, res) {
     try {
-      const { name, phone, profileImage } = req.body;
-      const user = req.user;
+      const { name, email } = req.body;
+      
+      const user = await db.User.findByPk(req.userId);
+      
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          error: 'User not found'
+        });
+      }
 
-      // Update fields
+      // Update user fields
       if (name) user.name = name;
-      if (phone) user.phone = phone;
-      if (profileImage) user.profileImage = profileImage;
+      
+      if (email && email !== user.email) {
+        // Check if new email is already taken
+        const existingUser = await db.User.findOne({ where: { email } });
+        if (existingUser && existingUser.id !== user.id) {
+          return res.status(400).json({
+            success: false,
+            error: 'Email already in use'
+          });
+        }
+        user.email = email;
+      }
 
       await user.save();
+
+      // Return updated user without password
+      const userResponse = user.toSafeObject();
 
       res.json({
         success: true,
         message: 'Profile updated successfully',
-        data: user.toSafeObject()
+        data: { user: userResponse }
       });
+
     } catch (error) {
       console.error('Update profile error:', error);
       res.status(500).json({
@@ -145,12 +209,21 @@ const authController = {
   async changePassword(req, res) {
     try {
       const { currentPassword, newPassword } = req.body;
-      const user = req.user;
+      
+      const user = await db.User.findByPk(req.userId);
+      
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          error: 'User not found'
+        });
+      }
 
-      // Check current password
-      const isValid = await user.checkPassword(currentPassword);
-      if (!isValid) {
-        return res.status(400).json({
+      // Verify current password
+      const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+      
+      if (!isValidPassword) {
+        return res.status(401).json({
           success: false,
           error: 'Current password is incorrect'
         });
@@ -164,6 +237,7 @@ const authController = {
         success: true,
         message: 'Password changed successfully'
       });
+
     } catch (error) {
       console.error('Change password error:', error);
       res.status(500).json({

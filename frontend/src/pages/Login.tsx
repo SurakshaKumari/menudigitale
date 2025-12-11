@@ -19,38 +19,48 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      const mockUser = {
-        id: '1',
-        email: email,
-        name: 'Restaurant Owner',
-        role: 'restaurant_owner',
-        restaurantId: '123'
-      };
-
-      const mockToken = 'mock-jwt-token';
+      // Call actual API via auth store
+      await login(email, password);
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Redirect to dashboard/home page
+      navigate('/dashboard'); // or navigate('/') based on your routing
+    } catch (err: any) {
+      console.error('Login error:', err);
       
-    //   login(mockUser, mockToken);
-      navigate('/');
-    } catch (err) {
-      setError('Invalid email or password. Please try again.');
+      // Handle different error types
+      if (err.response) {
+        // Axios error with response
+        const errorMessage = err.response.data?.error || 
+                            err.response.data?.message || 
+                            'Login failed. Please try again.';
+        setError(errorMessage);
+      } else if (err.request) {
+        // Network error
+        setError('Network error. Please check your connection and try again.');
+      } else {
+        // Other errors
+        setError(err.message || 'Invalid email or password. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDemoLogin = (role: 'admin' | 'restaurant_owner' | 'editor') => {
+  const handleDemoLogin = async (role: 'admin' | 'restaurant_owner' | 'editor') => {
     const demoUsers = {
       admin: { email: 'admin@menudigitale.com', password: 'Admin123!' },
       restaurant_owner: { email: 'owner@ristorante.com', password: 'Owner123!' },
       editor: { email: 'editor@menudigitale.com', password: 'Editor123!' }
     };
 
-    setEmail(demoUsers[role].email);
-    setPassword(demoUsers[role].password);
+    const demoUser = demoUsers[role];
+    setEmail(demoUser.email);
+    setPassword(demoUser.password);
+    
+    // Optional: Auto-submit after setting credentials
+    // setTimeout(() => {
+    //   handleSubmit(new Event('submit') as any);
+    // }, 100);
   };
 
   return (
@@ -59,7 +69,7 @@ const Login = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl mb-4">
-            {/* <Restaurant className="h-8 w-8 text-white" /> */}
+            {/* Restaurant icon if available */}
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Menu Digitale</h1>
           <p className="text-gray-600 mt-2">Sign in to your restaurant dashboard</p>
@@ -82,6 +92,7 @@ const Login = () => {
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                   placeholder="you@restaurant.com"
                   required
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -100,11 +111,13 @@ const Login = () => {
                   className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                   placeholder="••••••••"
                   required
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                  disabled={isLoading}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -113,7 +126,7 @@ const Login = () => {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm animate-fadeIn">
                 {error}
               </div>
             )}
@@ -124,6 +137,7 @@ const Login = () => {
                 <input
                   type="checkbox"
                   className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                  disabled={isLoading}
                 />
                 <span className="ml-2 text-sm text-gray-700">Remember me</span>
               </label>
@@ -158,19 +172,22 @@ const Login = () => {
             <div className="grid grid-cols-3 gap-3">
               <button
                 onClick={() => handleDemoLogin('admin')}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 rounded-lg text-sm font-medium transition-colors"
+                disabled={isLoading}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Admin
               </button>
               <button
                 onClick={() => handleDemoLogin('restaurant_owner')}
-                className="bg-blue-100 hover:bg-blue-200 text-blue-800 py-2 rounded-lg text-sm font-medium transition-colors"
+                disabled={isLoading}
+                className="bg-blue-100 hover:bg-blue-200 text-blue-800 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Owner
               </button>
               <button
                 onClick={() => handleDemoLogin('editor')}
-                className="bg-green-100 hover:bg-green-200 text-green-800 py-2 rounded-lg text-sm font-medium transition-colors"
+                disabled={isLoading}
+                className="bg-green-100 hover:bg-green-200 text-green-800 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Editor
               </button>

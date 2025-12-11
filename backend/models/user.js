@@ -1,3 +1,4 @@
+// models/user.js - TEMPORARY VERSION (no foreign key constraints)
 'use strict';
 const { Model } = require('sequelize');
 const bcrypt = require('bcryptjs');
@@ -6,7 +7,8 @@ const jwt = require('jsonwebtoken');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
-      // Define associations here
+      // TEMPORARILY COMMENT OUT ALL ASSOCIATIONS
+      /*
       User.belongsTo(models.Restaurant, {
         foreignKey: 'restaurantId',
         as: 'restaurant'
@@ -16,11 +18,11 @@ module.exports = (sequelize, DataTypes) => {
         as: 'agency'
       });
       
-      // Add these new associations
       User.hasMany(models.Menu, {
         foreignKey: 'userId',
         as: 'menus'
       });
+      */
     }
 
     // Instance method to check password
@@ -42,38 +44,20 @@ module.exports = (sequelize, DataTypes) => {
       );
     }
 
-    // Generate refresh token
-    generateRefreshToken() {
-      return jwt.sign(
-        { id: this.id },
-        process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-change-in-production',
-        { expiresIn: '30d' }
-      );
-    }
-
     // Get safe user data (without sensitive info)
     toSafeObject() {
-      const { password, createdAt, updatedAt, ...safeData } = this.toJSON();
-      return safeData;
-    }
-
-    // Check if user is admin
-    isAdmin() {
-      return this.role === 'admin';
-    }
-
-    // Check if user is restaurant owner
-    isRestaurantOwner() {
-      return this.role === 'restaurant_owner';
-    }
-
-    // Check if user is editor
-    isEditor() {
-      return this.role === 'editor';
+      const values = Object.assign({}, this.get());
+      delete values.password;
+      return values;
     }
   }
 
   User.init({
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -127,30 +111,18 @@ module.exports = (sequelize, DataTypes) => {
     },
     profileImage: {
       type: DataTypes.STRING,
-      allowNull: true,
-      validate: {
-        isUrl: {
-          msg: 'Profile image must be a valid URL',
-          allowEmpty: true
-        }
-      }
+      allowNull: true
     },
-    // Add new fields
+    // CHANGE THESE TO STRING TEMPORARILY (remove foreign key constraints)
     restaurantId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'Restaurants',
-        key: 'id'
-      }
+      type: DataTypes.STRING, // Changed from INTEGER to STRING
+      allowNull: true
+      // REMOVED: references: { model: 'Restaurants', key: 'id' }
     },
     agencyId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'Agencies',
-        key: 'id'
-      }
+      type: DataTypes.STRING, // Changed from INTEGER to STRING
+      allowNull: true
+      // REMOVED: references: { model: 'Agencies', key: 'id' }
     },
     isActive: {
       type: DataTypes.BOOLEAN,
@@ -162,20 +134,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     phone: {
       type: DataTypes.STRING,
-      allowNull: true,
-      validate: {
-        is: {
-          args: /^[\+]?[0-9\s\-\(\)]{10,}$/,
-          msg: 'Please enter a valid phone number'
-        }
-      }
-    },
-    resetPasswordToken: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    resetPasswordExpires: {
-      type: DataTypes.DATE,
       allowNull: true
     }
   }, {
@@ -195,24 +153,6 @@ module.exports = (sequelize, DataTypes) => {
         if (user.changed('password')) {
           const salt = await bcrypt.genSalt(10);
           user.password = await bcrypt.hash(user.password, salt);
-        }
-      },
-      afterCreate: (user) => {
-        console.log(`User created: ${user.email} (ID: ${user.id})`);
-      }
-    },
-    scopes: {
-      active: {
-        where: {
-          isActive: true
-        }
-      },
-      withRestaurant: {
-        include: ['restaurant']
-      },
-      safe: {
-        attributes: {
-          exclude: ['password', 'resetPasswordToken', 'resetPasswordExpires']
         }
       }
     }

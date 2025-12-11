@@ -3,35 +3,21 @@ const cors = require("cors");
 const helmet = require("helmet");
 const compression = require("compression");
 const path = require("path");
-const { Sequelize } = require("sequelize");
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Database connection
-const sequelize = new Sequelize(
-  process.env.DB_NAME || 'menu_ai_db',
-  process.env.DB_USER || 'cP6EVeT3HX',
-  process.env.DB_PASSWORD || 'SA+faTa788Ub6Zg',
-  {
-    host: process.env.DB_HOST || 'phpmyadmin.kmzerowebmarketing.com',
-    port: process.env.DB_PORT || 3306,
-    dialect: 'mysql',
-    logging: false,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    }
-  }
-);
+// Import models - this creates the Sequelize connection
+const db = require('../models');
 
 // Middleware
 app.use(helmet());
 app.use(compression());
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -44,12 +30,30 @@ if (fs.existsSync(frontendBuildPath)) {
   app.use(express.static(frontendBuildPath));
 }
 
-// Test database connection
-sequelize.authenticate()
-  .then(() => console.log('✅ Database Connected'))
-  .catch(err => console.error('❌ Database Error:', err.message));
+// Test database connection using the models' sequelize instance
+db.sequelize.authenticate()
+  .then(() => {
+    console.log('✅ Database Connected');
+    
+    // Sync database (optional - can be removed in production)
+    return db.sequelize.sync({ alter: true });
+  })
+  .then(() => {
+    console.log('✅ Database synced');
+  })
+  .catch(err => {
+    console.error('❌ Database Error:', err.message);
+  });
 
-// API Routes
+// Debug: Check if models are loaded
+console.log('Available models:', Object.keys(db).filter(key => !['sequelize', 'Sequelize'].includes(key)));
+console.log('User model exists?', !!db.User);
+
+// ========== IMPORT AUTH ROUTES ==========
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
+
+// ========== EXISTING ROUTES ==========
 app.get("/api/status", (req, res) => {
   res.json({ 
     status: "OK", 
@@ -60,7 +64,7 @@ app.get("/api/status", (req, res) => {
 
 app.get("/api/health", async (req, res) => {
   try {
-    await sequelize.authenticate();
+    await db.sequelize.authenticate(); // Use db.sequelize
     res.json({ 
       status: "healthy", 
       database: "connected",
@@ -71,6 +75,28 @@ app.get("/api/health", async (req, res) => {
       status: "degraded", 
       database: "disconnected",
       timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Test route to check model functionality
+app.get("/api/test-model", async (req, res) => {
+  try {
+    const userCount = await db.User.count();
+    res.json({
+      success: true,
+      message: 'Model test successful',
+      data: {
+        userCount,
+        models: Object.keys(db).filter(key => !['sequelize', 'Sequelize'].includes(key))
+      }
+    });
+  } catch (error) {
+    console.error('Model test error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Model test failed',
+      details: error.message
     });
   }
 });
@@ -92,7 +118,6 @@ app.get("/", (req, res) => {
 });
 
 // For React Router - serve index.html for all client-side routes
-// Use a regex to match all routes except /api/*
 app.get(/^(?!\/api).*$/, (req, res) => {
   if (fs.existsSync(frontendBuildPath)) {
     return res.sendFile(path.join(frontendBuildPath, "index.html"));
@@ -100,12 +125,27 @@ app.get(/^(?!\/api).*$/, (req, res) => {
   res.status(404).send('Route not found');
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Server error:', err.stack);
+  res.status(500).json({
+    success: false,
+    error: 'Internal server error'
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌐 API Base URL: http://localhost:${PORT}/api`);
+  console.log(`🔑 Login endpoint: POST http://localhost:${PORT}/api/auth/login`);
+  console.log(`📊 Health check: GET http://localhost:${PORT}/api/health`);
+  console.log(`🔧 Model test: GET http://localhost:${PORT}/api/test-model`);
+  console.log(`\n📝 Using real JWT tokens for authentication`);
+  
   if (fs.existsSync(frontendBuildPath)) {
-    console.log(`🌐 Frontend: Served from ${frontendBuildPath}`);
+    console.log(`\n📁 Frontend: Served from ${frontendBuildPath}`);
   } else {
-    console.log(`⚠️ Frontend: Build not found`);
+    console.log(`\n⚠️ Frontend: Build not found at ${frontendBuildPath}`);
   }
 });
