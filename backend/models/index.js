@@ -4,23 +4,20 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const path = require('path');
 require('dotenv').config();
+const config = require('../config/database');
 
 // Database configuration
 const sequelize = new Sequelize(
-  process.env.DB_NAME || 'menu_ai_db',
-  process.env.DB_USER || 'cP6EVeT3HX',
-  process.env.DB_PASSWORD || 'SA+faTa788Ub6Zg',
+  config.database,
+  config.username,
+  config.password,
   {
-    host: process.env.DB_HOST || 'phpmyadmin.kmzerowebmarketing.com',
-    port: process.env.DB_PORT || 3306,
-    dialect: 'mysql',
-    logging: console.log, // Enable logging to debug
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    }
+    host: config.host,
+    port: config.port,
+    dialect: config.dialect,
+    logging: config.logging,
+    pool: config.pool,
+    dialectOptions: config.dialOptions || {}
   }
 );
 
