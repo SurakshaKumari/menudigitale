@@ -1,51 +1,38 @@
+// components/ProtectedRoute.tsx
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useEffect, useState } from 'react';
 
 const ProtectedRoute = () => {
-  const { isAuthenticated, token } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isValidToken, setIsValidToken] = useState(false);
+  const { isAuthenticated, initializeAuth } = useAuthStore();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
+    // Initialize auth state on component mount
+    initializeAuth();
+    setIsInitialized(true);
+  }, [initializeAuth]);
 
-      try {
-        const response = await fetch('http://localhost:5000/api/auth/check-auth', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (response.ok) {
-          setIsValidToken(true);
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [token]);
-
-  if (isLoading) {
+  // Show loading while initializing
+  if (!isInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0A0C0B]"></div>
       </div>
     );
   }
 
-  if (!isAuthenticated || !isValidToken) {
+  // Debug logging
+  console.log('ProtectedRoute - isAuthenticated:', isAuthenticated);
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    console.log('Not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
+  // Render protected content
+  console.log('Authenticated, rendering protected routes');
   return <Outlet />;
 };
 

@@ -13,38 +13,37 @@ const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuthStore();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
+ // In Login.tsx, update the handleSubmit function:
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError('');
+  setIsLoading(true);
 
-    try {
-      // Call actual API via auth store
-      await login(email, password);
-      
-      // Redirect to dashboard/home page
-      navigate('/dashboard'); // or navigate('/') based on your routing
-    } catch (err: any) {
-      console.error('Login error:', err);
-      
-      // Handle different error types
-      if (err.response) {
-        // Axios error with response
-        const errorMessage = err.response.data?.error || 
-                            err.response.data?.message || 
-                            'Login failed. Please try again.';
-        setError(errorMessage);
-      } else if (err.request) {
-        // Network error
-        setError('Network error. Please check your connection and try again.');
-      } else {
-        // Other errors
-        setError(err.message || 'Invalid email or password. Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
+  try {
+    // Call actual API via auth store
+    await login(email, password);
+    
+    console.log('Login successful, navigating to /');
+    // Redirect to dashboard/home page
+    navigate('/');
+  } catch (err: any) {
+    console.error('Login error:', err);
+    
+    // Handle different error types
+    if (err.response) {
+      const errorMessage = err.response.data?.error || 
+                          err.response.data?.message || 
+                          'Login failed. Please try again.';
+      setError(errorMessage);
+    } else if (err.request) {
+      setError('Network error. Please check your connection and try again.');
+    } else {
+      setError(err.message || 'Invalid email or password. Please try again.');
     }
-  };
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleDemoLogin = async (role: 'admin' | 'restaurant_owner' | 'editor') => {
     const demoUsers = {
@@ -64,32 +63,36 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#F0F7F4] to-[#E8F0ED] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl mb-4">
-            {/* Restaurant icon if available */}
+          <div className="inline-flex items-center justify-center w-24 h-24 mb-4 overflow-hidden">
+            <img 
+              src="/menu.jpeg" 
+              alt="MenùDigitale Logo"
+              className="w-full h-full object-contain p-2"
+            />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Menu Digitale</h1>
-          <p className="text-gray-600 mt-2">Sign in to your restaurant dashboard</p>
+          <h1 className="text-3xl font-bold text-[#0A0C0B]">MenùDigitale</h1>
+          <p className="text-[#687d76] mt-2">Sign in to your restaurant dashboard</p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[#0A0C0B] mb-2">
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#687d76]" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7BD5B5] focus:border-[#7BD5B5] outline-none transition"
                   placeholder="you@restaurant.com"
                   required
                   disabled={isLoading}
@@ -99,16 +102,16 @@ const Login = () => {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[#0A0C0B] mb-2">
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#687d76]" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7BD5B5] focus:border-[#7BD5B5] outline-none transition"
                   placeholder="••••••••"
                   required
                   disabled={isLoading}
@@ -116,7 +119,7 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#687d76] hover:text-[#0A0C0B] disabled:opacity-50"
                   disabled={isLoading}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -136,21 +139,21 @@ const Login = () => {
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                  className="h-4 w-4 text-[#0A0C0B] rounded border-gray-300 focus:ring-[#0A0C0B]"
                   disabled={isLoading}
                 />
-                <span className="ml-2 text-sm text-gray-700">Remember me</span>
+                <span className="ml-2 text-sm text-[#687d76]">Remember me</span>
               </label>
-              <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+              <Link to="/forgot-password" className="text-sm text-[#0A0C0B] hover:text-[#2a2c2b] font-medium">
                 Forgot password?
               </Link>
             </div>
 
-            {/* Submit Button */}
+            {/* Submit Button - Updated to #0A0C0B */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
+              className="w-full bg-[#0A0C0B] hover:bg-[#1A1C1B] text-white py-3 px-4 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0A0C0B] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
             >
               {isLoading ? (
                 <>
@@ -168,26 +171,26 @@ const Login = () => {
 
           {/* Demo Login Buttons */}
           <div className="mt-8">
-            <p className="text-center text-sm text-gray-600 mb-4">Try demo accounts:</p>
+            <p className="text-center text-sm text-[#687d76] mb-4">Try demo accounts:</p>
             <div className="grid grid-cols-3 gap-3">
               <button
                 onClick={() => handleDemoLogin('admin')}
                 disabled={isLoading}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-[#E8F0ED] hover:bg-[#d0e0da] text-[#0A0C0B] py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Admin
               </button>
               <button
                 onClick={() => handleDemoLogin('restaurant_owner')}
                 disabled={isLoading}
-                className="bg-blue-100 hover:bg-blue-200 text-blue-800 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-[#7BD5B5]/20 hover:bg-[#7BD5B5]/30 text-[#0A0C0B] py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Owner
               </button>
               <button
                 onClick={() => handleDemoLogin('editor')}
                 disabled={isLoading}
-                className="bg-green-100 hover:bg-green-200 text-green-800 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-[#687d76]/10 hover:bg-[#687d76]/20 text-[#0A0C0B] py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Editor
               </button>
@@ -196,9 +199,9 @@ const Login = () => {
 
           {/* Divider */}
           <div className="mt-8 pt-8 border-t border-gray-200">
-            <p className="text-center text-sm text-gray-600">
+            <p className="text-center text-sm text-[#687d76]">
               Don't have an account?{' '}
-              <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+              <Link to="/register" className="text-[#0A0C0B] hover:text-[#2a2c2b] font-medium">
                 Contact sales
               </Link>
             </p>
@@ -207,12 +210,14 @@ const Login = () => {
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="text-xs text-gray-500">
-            © {new Date().getFullYear()} Menu Digitale. All rights reserved.
+          <p className="text-xs text-[#687d76]">
+            © {new Date().getFullYear()} MenùDigitale. All rights reserved.
             <br />
-            <Link to="/privacy" className="hover:text-gray-700">Privacy Policy</Link>
+            Powered by <span className="font-semibold text-[#0A0C0B]">KYZERO® WEBMARKETING</span>
+            <br />
+            <Link to="/privacy" className="hover:text-[#0A0C0B]">Privacy Policy</Link>
             {' · '}
-            <Link to="/terms" className="hover:text-gray-700">Terms of Service</Link>
+            <Link to="/terms" className="hover:text-[#0A0C0B]">Terms of Service</Link>
           </p>
         </div>
       </div>

@@ -1,3 +1,4 @@
+// App.tsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from './components/theme-provider'
 import Layout from './components/layout/Layout'
@@ -5,8 +6,15 @@ import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import NotFound from './pages/NotFound'
 import ProtectedRoute from './components/ProtectedRoute'
+import { useEffect } from 'react'
+import { initializeAuth } from './store/authStore'
 
 function App() {
+  // Initialize auth on app start
+  useEffect(() => {
+    initializeAuth();
+  }, []);
+
   return (
     <ThemeProvider defaultTheme="light" storageKey="menu-digitale-theme">
       <Router>

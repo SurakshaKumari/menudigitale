@@ -19,8 +19,8 @@ code {
 
 /* Basic theme variables if needed */
 :root {
-  --primary: #3b82f6;
-  --secondary: #10b981;
+  --primary: #7BD5B5;
+  --secondary: #0A0C0B;
   --background: #ffffff;
-  --foreground: #1f2937;
+  --foreground: #000100;
 }
