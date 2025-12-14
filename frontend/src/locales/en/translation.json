@@ -1,0 +1,93 @@
+{
+  "header": {
+    "search_placeholder": "Search menus, restaurants, dishes...",
+    "search": "Search...",
+    "notifications": "Notifications",
+    "unread_notifications": "{{count}} unread notification",
+    "unread_notifications_plural": "{{count}} unread notifications",
+    "view_all_notifications": "View all notifications",
+    "my_profile": "My Profile",
+    "settings": "Settings",
+    "light_mode": "Light Mode",
+    "dark_mode": "Dark Mode",
+    "logout": "Logout",
+    "help": "Help",
+    "language": "Language",
+    "language_it": "Italian",
+    "language_en": "English"
+  },
+  "user_roles": {
+    "admin": "Administrator",
+    "editor": "Editor",
+    "restaurant_owner": "Restaurant Owner"
+  },
+  "notifications": {
+    "new_menu_created": "New Menu Created",
+    "menu_created_message": "Menu \"Summer Specials\" has been created successfully",
+    "translation_completed": "Translation Completed",
+    "translation_message": "Your menu has been translated to French",
+    "pdf_generated": "PDF Generated",
+    "pdf_message": "PDF version of your menu is ready for download"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back! Here's what's happening with your menus today.",
+    "stats": {
+      "total_menus": "Total Menus",
+      "active_users": "Active Users", 
+      "menu_views": "Menu Views",
+      "pdfs_generated": "PDFs Generated"
+    },
+    "quick_actions": "Quick Actions",
+    "actions": {
+      "create_menu": "Create New Menu",
+      "create_menu_desc": "Start a new menu creation wizard",
+      "generate_pdf": "Generate PDF",
+      "generate_pdf_desc": "Create printable menu PDF",
+      "translate_menu": "Translate Menu",
+      "translate_menu_desc": "Translate menu to other languages",
+      "manage_hours": "Manage Opening Hours",
+      "manage_hours_desc": "Set restaurant opening times"
+    },
+    "recent_menus": "Recent Menus",
+    "view_all": "View all →",
+    "statistics": "Statistics Overview",
+    "stat_items": {
+      "menu_performance": "Menu Performance",
+      "translation_usage": "Translation Usage",
+      "pdf_downloads": "PDF Downloads",
+      "qr_scans": "QR Code Scans"
+    },
+    "whats_new": "What's New?",
+    "whats_new_desc": "WhatsApp integration and Google My Business sync are coming soon!",
+    "features": {
+      "whatsapp": "WhatsApp Updates",
+      "google_sync": "Google Sync",
+      "dynamic_qr": "Dynamic QR"
+    },
+    "explore_features": "Explore Features"
+  },
+  "status": {
+    "active": "active",
+    "inactive": "inactive"
+  },
+  "sidebar": {
+    "brand": "MenùDigitale",
+    "dashboard": "Dashboard",
+    "menus": "Menus",
+    "users": "Users",
+    "pdf_generator": "PDF Generator",
+    "translations": "Translations",
+    "whatsapp": "WhatsApp",
+    "statistics": "Statistics",
+    "qr_codes": "QR Codes",
+    "opening_hours": "Opening Hours",
+    "settings": "Settings",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "toggle_menu": "Toggle menu",
+    "close": "Close menu",
+    "powered_by": "Powered by"
+  }
+
+}

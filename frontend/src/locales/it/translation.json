@@ -1,0 +1,95 @@
+{
+  "header": {
+    "search_placeholder": "Cerca menu, ristoranti, piatti...",
+    "search": "Cerca...",
+    "notifications": "Notifiche",
+    "unread_notifications": "{{count}} notifica non letta",
+    "unread_notifications_plural": "{{count}} notifiche non lette",
+    "view_all_notifications": "Vedi tutte le notifiche",
+    "my_profile": "Il mio profilo",
+    "settings": "Impostazioni",
+    "light_mode": "Modalità chiara",
+    "dark_mode": "Modalità scura",
+    "logout": "Esci",
+    "help": "Aiuto",
+    "language": "Lingua",
+    "language_it": "Italiano",
+    "language_en": "Inglese"
+  },
+  "user_roles": {
+    "admin": "Amministratore",
+    "editor": "Editore",
+    "restaurant_owner": "Proprietario del ristorante"
+  },
+  "notifications": {
+    "new_menu_created": "Nuovo Menu Creato",
+    "menu_created_message": "Il menu \"Specialità estive\" è stato creato con successo",
+    "translation_completed": "Traduzione Completata",
+    "translation_message": "Il tuo menu è stato tradotto in francese",
+    "pdf_generated": "PDF Generato",
+    "pdf_message": "La versione PDF del tuo menu è pronta per il download"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Bentornato! Ecco cosa sta succedendo ai tuoi menu oggi.",
+    "stats": {
+      "total_menus": "Menu Totali",
+      "active_users": "Utenti Attivi", 
+      "menu_views": "Visualizzazioni Menu",
+      "pdfs_generated": "PDF Generati"
+    },
+    "quick_actions": "Azioni Rapide",
+    "actions": {
+      "create_menu": "Crea Nuovo Menu",
+      "create_menu_desc": "Avvia una nuova procedura guidata per la creazione del menu",
+      "generate_pdf": "Genera PDF",
+      "generate_pdf_desc": "Crea un menu stampabile in PDF",
+      "translate_menu": "Traduci Menu",
+      "translate_menu_desc": "Traduci il menu in altre lingue",
+      "manage_hours": "Gestisci Orari",
+      "manage_hours_desc": "Imposta gli orari di apertura del ristorante"
+    },
+    "recent_menus": "Menu Recenti",
+    "view_all": "Vedi tutti →",
+    "statistics": "Panoramica Statistiche",
+    "stat_items": {
+      "menu_performance": "Prestazioni Menu",
+      "translation_usage": "Utilizzo Traduzioni",
+      "pdf_downloads": "Download PDF",
+      "qr_scans": "Scansioni QR Code"
+    },
+    "whats_new": "Novità?",
+    "whats_new_desc": "Integrazione WhatsApp e sincronizzazione Google My Business in arrivo!",
+    "features": {
+      "whatsapp": "Aggiornamenti WhatsApp",
+      "google_sync": "Sincronizzazione Google",
+      "dynamic_qr": "QR Dinamico"
+    },
+    "explore_features": "Scopri Funzionalità"
+  },
+  "status": {
+    "active": "attivo",
+    "inactive": "inattivo"
+  },
+  
+  "sidebar": {
+    "brand": "MenùDigitale",
+    "dashboard": "Dashboard",
+    "menus": "Menu",
+    "users": "Utenti",
+    "pdf_generator": "Generatore PDF",
+    "translations": "Traduzioni",
+    "whatsapp": "WhatsApp",
+    "statistics": "Statistiche",
+    "qr_codes": "Codici QR",
+    "opening_hours": "Orari Apertura",
+    "settings": "Impostazioni",
+    "collapse": "Riduci barra laterale",
+    "expand": "Espandi barra laterale",
+    "toggle_menu": "Apri/chiudi menu",
+    "close": "Chiudi menu",
+    "powered_by": "Sviluppato da"
+  }
+
+
+}
