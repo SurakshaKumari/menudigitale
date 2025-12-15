@@ -52,7 +52,9 @@ console.log('User model exists?', !!db.User);
 
 // ========== IMPORT AUTH ROUTES ==========
 const authRoutes = require('./routes/auth');
+const menuRoutes = require('./routes/menus');
 app.use('/api/auth', authRoutes);
+app.use('/api/menu', menuRoutes);
 
 // ========== EXISTING ROUTES ==========
 app.get("/api/status", (req, res) => {

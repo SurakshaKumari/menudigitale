@@ -1,9 +1,11 @@
 import { BarChart3, Users, Menu, FileText, Globe, QrCode, Clock, MessageSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next'; // Add this import
+import { useNavigate } from 'react-router-dom'; // Add this import
+
 
 const Dashboard = () => {
   const { t } = useTranslation(); // Add this hook
-
+const navigate = useNavigate(); 
   const stats = [
     { 
       name: t('dashboard.stats.total_menus'), // Translated
@@ -38,7 +40,7 @@ const Dashboard = () => {
       icon: Menu, 
       color: 'text-[#0A0C0B]', 
       bgColor: 'bg-[#0A0C0B]/5', 
-      path: '/menus/create' 
+      path: '/menu/create' 
     },
     { 
       title: t('dashboard.actions.generate_pdf'), // Translated
@@ -108,30 +110,31 @@ const Dashboard = () => {
       </div>
 
       {/* Quick Actions */}
-      <div>
-        <h2 className="text-xl font-semibold text-[#0A0C0B] mb-4">
-          {t('dashboard.quick_actions')} {/* Translated */}
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickActions.map((action) => (
-            <button
-              key={action.title}
-              className={`${action.bgColor} rounded-xl border border-gray-200 p-5 text-left hover:shadow-md transition-all hover:border-[#7BD5B5]/30 hover:translate-y-[-2px]`}
-              onClick={() => window.location.href = action.path}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${action.color} bg-white border border-gray-200`}>
-                  <action.icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-[#0A0C0B]">{action.title}</h3>
-                  <p className="text-sm text-[#687d76] mt-1">{action.description}</p>
-                </div>
+    <div>
+      <h2 className="text-xl font-semibold text-[#0A0C0B] mb-4">
+        {t('dashboard.quick_actions')}
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {quickActions.map((action) => (
+          <button
+            key={action.title}
+            className={`${action.bgColor} rounded-xl border border-gray-200 p-5 text-left hover:shadow-md transition-all hover:border-[#7BD5B5]/30 hover:translate-y-[-2px]`}
+            onClick={() => navigate(action.path)} // Use navigate instead
+          >
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${action.color} bg-white border border-gray-200`}>
+                <action.icon className="h-5 w-5" />
               </div>
-            </button>
-          ))}
-        </div>
+              <div>
+                <h3 className="font-semibold text-[#0A0C0B]">{action.title}</h3>
+                <p className="text-sm text-[#687d76] mt-1">{action.description}</p>
+              </div>
+            </div>
+          </button>
+        ))}
       </div>
+    </div>
+    
 
       {/* Recent Menus & Statistics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

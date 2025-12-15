@@ -11,6 +11,7 @@ export interface User {
   restaurantId?: number | null;
   // Add other user properties as needed
 }
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 // Define auth state interface
 interface AuthState {
@@ -99,7 +100,7 @@ export const useAuthStore = create<AuthState>()(
           }
 
           // Real API call - replace with your actual endpoint
-          const response = await fetch('http://localhost:5000/api/auth/login', {
+          const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

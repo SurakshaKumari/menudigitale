@@ -7,6 +7,8 @@ const databaseConfig = {
     host: process.env.DB_HOST || 'phpmyadmin.kmzerowebmarketing.com',
     port: process.env.DB_PORT || 3306,
     dialect: 'mysql',
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY || 'org-bp21faiK0hyusC9R29XMOd0j',
+    GOOGLE_PLACES_API_KEY: process.env.GOOGLE_PLACES_API_KEY || "AIzaSyCPUKeDv-1IRr1sezxSvBZ48kFxJwIaHug",
     logging: console.log,
     pool: {
       max: 5,
