@@ -7,8 +7,8 @@ const databaseConfig = {
     host: process.env.DB_HOST || 'phpmyadmin.kmzerowebmarketing.com',
     port: process.env.DB_PORT || 3306,
     dialect: 'mysql',
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY || 'kkkkk',
-    GOOGLE_PLACES_API_KEY: process.env.GOOGLE_PLACES_API_KEY || "lll",
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
+    GOOGLE_PLACES_API_KEY: process.env.GOOGLE_PLACES_API_KEY || "",
     logging: console.log,
     pool: {
       max: 5,
@@ -41,5 +41,5 @@ const databaseConfig = {
   }
 };
 
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV || 'production';
 module.exports = databaseConfig[env];
