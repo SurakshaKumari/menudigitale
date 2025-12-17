@@ -2,7 +2,7 @@
 const databaseConfig = {
   development: {
     username: process.env.DB_USER || 'cP6EVeT3HX',
-    password: process.env.DB_PASSWORD || 'SA+faTa788Ub6Zg',
+    password: process.env.DB_PASSWORD || 'qa5EaGAZ645-PvS',
     database: process.env.DB_NAME || 'menu_ai_db',
     host: process.env.DB_HOST || 'phpmyadmin.kmzerowebmarketing.com',
     port: process.env.DB_PORT || 3306,
