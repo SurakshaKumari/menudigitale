@@ -10,7 +10,7 @@ import { useEffect } from 'react'
 import { initializeAuth } from './store/authStore'
 
 // Import Create Menu Page
-import CreateMenuPage from './pages/menus/CreateMenuPage' // You need to create this
+import CreateMenuPage from './pages/menus/CreateMenu' // You need to create this
 
 // Menu Management Pages
 import MenuManagement from './pages/MenuManagement'
