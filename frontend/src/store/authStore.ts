@@ -63,101 +63,64 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // Login function
-      login: async (email: string, password: string) => {
-        set({ isLoading: true, error: null });
-        
-        try {
-          console.log('Attempting login for:', email);
-          
-          // For demo/testing purposes - replace with your actual API call
-          if (email.includes('demo') || password.includes('demo')) {
-            // Mock successful login for demo
-            setTimeout(() => {
-              const mockUser: User = {
-                id: 1,
-                email: email,
-                name: 'Demo User',
-                role: 'restaurant_owner',
-                restaurantId: 123,
-              };
-              const mockToken = 'demo-token-123';
-              
-              set({
-                isAuthenticated: true,
-                user: mockUser,
-                token: mockToken,
-                isLoading: false,
-              });
-              
-              // Store in localStorage
-              localStorage.setItem('token', mockToken);
-              localStorage.setItem('user', JSON.stringify(mockUser));
-              
-              console.log('Demo login successful');
-            }, 1000);
-            return;
-          }
-
-          // Real API call - replace with your actual endpoint
-          const response = await fetch(`${API_BASE_URL}/auth/login`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email, password }),
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const data = await response.json();
-          
-          if (data.success) {
-            console.log('Login successful:', data);
-            
-            set({
-              isAuthenticated: true,
-              user: data.data.user,
-              token: data.data.token,
-              isLoading: false,
-            });
-            
-            // Store in localStorage for persistence
-            localStorage.setItem('token', data.data.token);
-            localStorage.setItem('user', JSON.stringify(data.data.user));
-            
-            console.log('Auth state updated and stored in localStorage');
-          } else {
-            throw new Error(data.message || 'Login failed');
-          }
-        } catch (error: any) {
-          console.error('Login error:', error);
-          
-          let errorMessage = 'Login failed. Please try again.';
-          
-          if (error.message.includes('Network')) {
-            errorMessage = 'Network error. Please check your connection.';
-          } else if (error.message) {
-            errorMessage = error.message;
-          }
-          
-          set({
-            isAuthenticated: false,
-            user: null,
-            token: null,
-            isLoading: false,
-            error: errorMessage,
-          });
-          
-          // Clear localStorage on error
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          
-          throw error;
-        }
+      // store/authStore.ts - Updated login function
+login: async (email: string, password: string) => {
+  set({ isLoading: true, error: null });
+  
+  try {
+    console.log('Attempting login for:', email);
+    
+    // Real API call
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || `HTTP error! status: ${response.status}`);
+    }
+
+    if (data.success) {
+      console.log('Login successful:', data);
+      
+      const user = data.data.user;
+      const token = data.data.token;
+      
+      // IMPORTANT: Store token in localStorage
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      // Then update state
+      set({
+        isAuthenticated: true,
+        user: user,
+        token: token,
+        isLoading: false,
+      });
+      
+      console.log('Auth state updated and stored in localStorage');
+    } else {
+      throw new Error(data.message || 'Login failed');
+    }
+  } catch (error: any) {
+    console.error('Login error:', error);
+    
+    set({
+      isAuthenticated: false,
+      user: null,
+      token: null,
+      isLoading: false,
+      error: error.message || 'Login failed. Please try again.',
+    });
+    
+    throw error;
+  }
+},
 
       // Logout function
       logout: () => {

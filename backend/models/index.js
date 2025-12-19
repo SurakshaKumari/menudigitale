@@ -1,12 +1,9 @@
-// models/index.js - SIMPLE WORKING VERSION
 'use strict';
 
 const { Sequelize, DataTypes } = require('sequelize');
-const path = require('path');
 require('dotenv').config();
 const config = require('../config/database');
 
-// Database configuration
 const sequelize = new Sequelize(
   config.database,
   config.username,
@@ -23,20 +20,16 @@ const sequelize = new Sequelize(
 
 const db = {};
 
-// Load ONLY the User model for now
-try {
-  console.log('📦 Loading User model...');
-  const UserModel = require('./user');
-  db.User = UserModel(sequelize, DataTypes);
-  console.log('✅ User model loaded');
-} catch (error) {
-  console.error('❌ Failed to load User model:', error.message);
-}
+// Load all models
+['user', 'restaurant', 'menu'].forEach(modelFile => {
+  const model = require(`./${modelFile}`)(sequelize, DataTypes);
+  db[model.name] = model;
+});
 
-// Skip associations for now
-// db.User.associate = function(models) {
-//   // Empty function to avoid errors
-// };
+// Run associations
+Object.keys(db).forEach(modelName => {
+  if (db[modelName].associate) db[modelName].associate(db);
+});
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

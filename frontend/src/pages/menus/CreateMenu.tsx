@@ -1,17 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from '../../utils/axios';
 import { Loader2 } from 'lucide-react';
-import { AxiosError } from 'axios';
-
-/* ---------------- Types ---------------- */
-
-interface MenuColors {
-  primary?: string;
-  secondary?: string;
-  accent?: string;
-  dark?: string;
-  light?: string;
-}
 
 interface MenuData {
   name: string;
@@ -19,165 +8,267 @@ interface MenuData {
   phone?: string;
   website?: string;
   logo?: string;
-  colors?: MenuColors;
+  colors?: Record<string, string>;
 }
 
-/* ---------------- Component ---------------- */
-
-const CreateMenu: React.FC = () => {
-  const [name, setName] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
+export default function CreateMenu() {
+  const [name, setName] = useState('');
+  const [loading, setLoading] = useState(false);
   const [menuData, setMenuData] = useState<MenuData | null>(null);
-  const [error, setError] = useState<string>('');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [placeId, setPlaceId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSearch = async (): Promise<void> => {
-    if (!name.trim()) return;
+  // Check authentication on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Please login first');
+    }
+  }, []);
 
-    setLoading(true);
-    setError('');
-    setMenuData(null);
+  // 🔍 Search restaurant
+  const searchRestaurant = async () => {
+    if (!name) {
+      alert('Enter restaurant name');
+      return;
+    }
 
     try {
-      const res = await axios.post<{ menuData: MenuData }>(
-        '/menu/search-restaurant',
-        { name }
+      setLoading(true);
+      setError(null);
+
+      // Get token manually to ensure it's attached
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Please login first');
+        return;
+      }
+
+      console.log('Searching with token:', token);
+
+      const search = await axios.post('/menu/search', 
+        { name }, 
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
       );
 
-      setMenuData(res.data.menuData);
-    } catch (err) {
-      const axiosError = err as AxiosError<{ message: string }>;
-      setError(
-        axiosError.response?.data?.message ||
-          'Failed to fetch restaurant'
+      const best = search.data.bestMatch;
+
+      if (!best) {
+        alert('No restaurant found');
+        return;
+      }
+
+      setPlaceId(best.placeId);
+
+      // Get details with token
+      const details = await axios.post('/menu/details', 
+        { placeId: best.placeId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
       );
+
+      setMenuData(details.data.menuData);
+
+    } catch (err: any) {
+      console.error('Search error:', err);
+      
+      if (err.response?.status === 401) {
+        setError('Session expired. Please login again.');
+        alert('Session expired. Please login again.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      } else {
+        alert(err.response?.data?.error || 'Search failed');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🍽 Create menu
+  const createMenu = async () => {
+    if (!placeId) {
+      alert('PlaceId missing');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Get token manually
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Please login first');
+        return;
+      }
+
+      console.log('Creating menu with token:', token);
+
+      await axios.post('/menu/create', 
+        {
+          placeId,
+          theme,
+          background: '#ffffff'
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      alert('Menu created successfully');
+      
+      // Reset form
+      setName('');
+      setMenuData(null);
+      setPlaceId(null);
+
+    } catch (err: any) {
+      console.error('Create menu error:', err);
+      
+      if (err.response?.status === 401) {
+        setError('Session expired. Please login again.');
+        alert('Session expired. Please login again.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      } else {
+        alert(err.response?.data?.error || 'Menu creation failed');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-[#0A0C0B]">
-          Create New Menu
-        </h1>
-        <p className="text-[#687d76] mt-1">
-          Search your restaurant on Google and auto-import details
-        </p>
-      </div>
+    <div className="max-w-4xl mx-auto space-y-6 p-6">
+      <h1 className="text-2xl font-bold">Create Menu</h1>
 
-      {/* Search Box */}
-      <div className="bg-white p-6 rounded-xl border">
-        <label className="block text-sm font-medium mb-2">
-          Restaurant Name
-        </label>
-        <div className="flex gap-3">
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Osteria Francescana"
-            className="flex-1 border rounded-lg px-4 py-2 focus:outline-none"
-          />
-          <button
-            onClick={handleSearch}
-            className="bg-[#0A0C0B] text-white px-6 py-2 rounded-lg"
-          >
-            Search
-          </button>
-        </div>
-        {error && <p className="text-red-500 mt-2">{error}</p>}
-      </div>
-
-      {/* Loader */}
-      {loading && (
-        <div className="flex justify-center py-10">
-          <Loader2 className="animate-spin" />
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{error}</span>
+          <a href="/login" className="ml-2 text-blue-600 hover:text-blue-800 underline">
+            Login here
+          </a>
         </div>
       )}
 
-      {/* Preview Data */}
+      {/* Login reminder */}
+      {!localStorage.getItem('token') && !error && (
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+          <strong className="font-bold">Note: </strong>
+          <span className="block sm:inline">You need to login to create a menu.</span>
+          <a href="/login" className="ml-2 text-blue-600 hover:text-blue-800 underline">
+            Login here
+          </a>
+        </div>
+      )}
+
+      <div className="flex gap-3">
+        <input
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder="Restaurant name"
+          className="border px-4 py-2 rounded-lg flex-1"
+          disabled={!localStorage.getItem('token')}
+        />
+        <button
+          onClick={searchRestaurant}
+          className="bg-black text-white px-6 rounded-lg hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          disabled={!localStorage.getItem('token') || loading}
+        >
+          {loading ? <Loader2 className="animate-spin inline mr-2" size={18} /> : null}
+          Search
+        </button>
+      </div>
+
+      {loading && (
+        <div className="flex justify-center">
+          <Loader2 className="animate-spin" size={24} />
+        </div>
+      )}
+
       {menuData && (
-        <div className="bg-white p-6 rounded-xl border space-y-6">
-          <div className="flex gap-6 items-start">
+        <div className="bg-white border p-6 rounded-xl space-y-4 shadow-md">
+          <div className="flex gap-4">
             {menuData.logo && (
               <img
                 src={menuData.logo}
-                alt="logo"
-                className="w-28 h-28 rounded-lg object-cover border"
+                className="w-24 h-24 rounded object-cover border"
+                alt="Restaurant logo"
               />
             )}
-
-            <div className="space-y-1">
-              <h2 className="text-xl font-semibold">
-                {menuData.name}
-              </h2>
-              {menuData.address && (
-                <p className="text-sm text-[#687d76]">
-                  {menuData.address}
-                </p>
-              )}
-              {menuData.phone && (
-                <p className="text-sm">{menuData.phone}</p>
-              )}
+            <div>
+              <h2 className="font-semibold text-xl">{menuData.name}</h2>
+              {menuData.address && <p className="text-gray-600">{menuData.address}</p>}
+              {menuData.phone && <p className="text-gray-600">{menuData.phone}</p>}
               {menuData.website && (
-                <a
-                  href={menuData.website}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm text-blue-600"
-                >
-                  Website
-                </a>
+                <p className="text-blue-600">
+                  <a href={menuData.website} target="_blank" rel="noopener noreferrer">
+                    {menuData.website}
+                  </a>
+                </p>
               )}
             </div>
           </div>
 
-          {/* Colors Preview */}
           {menuData.colors && (
             <div>
-              <h3 className="font-medium mb-2">
-                Extracted Menu Colors
-              </h3>
-              <div className="flex gap-3">
-                {Object.values(menuData.colors).map(
-                  (color, i) =>
-                    color && (
-                      <div
-                        key={i}
-                        className="w-10 h-10 rounded"
-                        style={{ backgroundColor: color }}
-                      />
-                    )
-                )}
+              <p className="font-medium mb-2">Color Palette:</p>
+              <div className="flex gap-2">
+                {Object.values(menuData.colors).map((c, index) => (
+                  <div
+                    key={index}
+                    className="w-8 h-8 rounded border"
+                    style={{ background: c }}
+                    title={c}
+                  />
+                ))}
               </div>
             </div>
           )}
 
-          {/* Theme Selection */}
           <div>
-            <h3 className="font-medium mb-2">Theme</h3>
-            <div className="flex gap-4">
-              <button className="px-4 py-2 border rounded-lg">
+            <p className="font-medium mb-2">Select Theme:</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setTheme('light')}
+                className={`border px-4 py-2 rounded ${theme === 'light' ? 'bg-gray-200 border-gray-400' : 'hover:bg-gray-100'}`}
+              >
                 Light
               </button>
-              <button className="px-4 py-2 border rounded-lg">
+              <button
+                onClick={() => setTheme('dark')}
+                className={`border px-4 py-2 rounded ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-900' : 'hover:bg-gray-100'}`}
+              >
                 Dark
               </button>
             </div>
           </div>
 
-          {/* Final Action */}
-          <div className="flex justify-end">
-            <button className="bg-[#7BD5B5] px-6 py-2 rounded-lg font-medium">
-              Create Menu
-            </button>
-          </div>
+          <button
+            onClick={createMenu}
+            className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            disabled={loading || !localStorage.getItem('token')}
+          >
+            {loading ? <Loader2 className="animate-spin inline mr-2" size={18} /> : null}
+            Create Menu
+          </button>
         </div>
       )}
     </div>
   );
-};
-
-export default CreateMenu;
+}
