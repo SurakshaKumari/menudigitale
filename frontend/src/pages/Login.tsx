@@ -13,7 +13,6 @@ const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuthStore();
 
- // In Login.tsx, update the handleSubmit function:
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   setError('');
