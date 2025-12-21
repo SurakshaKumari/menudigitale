@@ -315,22 +315,22 @@ const MenuListPage = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="text-left py-3 px-6 font-semibold text-[#0A0C0B]">
-                      {t('menus.list.table.name') || 'Menu Name'}
+                      { 'Menu Name'}
                     </th>
                     <th className="text-left py-3 px-6 font-semibold text-[#0A0C0B]">
-                      {t('menus.list.table.status') || 'Status'}
+                      { 'Status'}
                     </th>
                     <th className="text-left py-3 px-6 font-semibold text-[#0A0C0B]">
-                      {t('menus.list.table.categories') || 'Categories'}
+                      { 'Categories'}
                     </th>
                     <th className="text-left py-3 px-6 font-semibold text-[#0A0C0B]">
-                      {t('menus.list.table.dishes') || 'Dishes'}
+                      { 'Dishes'}
                     </th>
                     <th className="text-left py-3 px-6 font-semibold text-[#0A0C0B]">
-                      {t('menus.list.table.last_updated') || 'Last Updated'}
+                      { 'Last Updated'}
                     </th>
                     <th className="text-left py-3 px-6 font-semibold text-[#0A0C0B]">
-                      {t('menus.list.table.actions') || 'Actions'}
+                      { 'Actions'}
                     </th>
                   </tr>
                 </thead>
