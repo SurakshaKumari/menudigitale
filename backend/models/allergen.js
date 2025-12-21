@@ -1,43 +1,34 @@
-'use strict';
-const { Model } = require('sequelize');
+const { DataTypes } = require('sequelize');
 
-module.exports = (sequelize, DataTypes) => {
-  class Allergen extends Model {
-    static associate(models) {
-      Allergen.belongsToMany(models.Dish, {
-        through: 'DishAllergens',
-        foreignKey: 'allergenId',
-        as: 'dishes'
-      });
-    }
-  }
-
-  Allergen.init({
+module.exports = (sequelize) => {
+  const Allergen = sequelize.define('Allergen', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true
     },
     code: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(10),
       allowNull: false,
       unique: true
     },
     description: {
-      type: DataTypes.TEXT,
-      allowNull: true
+      type: DataTypes.TEXT
     },
     icon: {
       type: DataTypes.STRING,
-      allowNull: true
+      comment: 'Icon URL or icon class name'
     },
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true
     }
   }, {
-    sequelize,
-    modelName: 'Allergen',
     tableName: 'Allergens',
     timestamps: true
   });

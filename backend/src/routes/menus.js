@@ -11,5 +11,22 @@ router.use(authMiddleware);
 router.post('/create', authMiddleware, menuController.createMenuFromGoogle);
 router.post('/search', authMiddleware, menuController.searchRestaurant);
 router.post('/details', authMiddleware, menuController.fetchRestaurantDetails);
+router.get('/all', menuController.getAllMenus);
+
+// 📋 GET MENU STATISTICS
+router.get('/statistics', menuController.getMenuStatistics);
+
+// 🔍 GET SINGLE MENU DETAILS
+router.get('/:id', menuController.getMenuById);
+
+// ✏️ UPDATE MENU
+router.put('/:id', menuController.updateMenu);
+
+// 🗑️ DELETE MENU (soft delete)
+router.delete('/:id', menuController.deleteMenu);
+
+
 
 module.exports = router;
+
+

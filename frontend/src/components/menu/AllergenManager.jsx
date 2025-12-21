@@ -1,10 +1,5 @@
-// MenuManagement.jsx - Complete file
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Layout from '../components/layout/Layout';
-
-// Import icons
 import {
   Plus,
   Edit,
@@ -15,24 +10,9 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
-  RefreshCw,
-  Menu,
-  FileText,
-  Globe,
-  Clock,
-  Settings,
-  Grid,
-  List,
-  BarChart3,
-  QrCode,
-  MessageSquare
+  RefreshCw
 } from 'lucide-react';
 
-// Import components
-import MenuHeader from '../components/menu/MenuHeader';
-import CategoryManager from '../components/menu/CategoryManager';
-
-// ==================== ALLERGEN MANAGER COMPONENT ====================
 const AllergenManager = ({ menuId, allergens: initialAllergens = [], onAllergensUpdate }) => {
   const [allergens, setAllergens] = useState(initialAllergens);
   const [loading, setLoading] = useState(true);
@@ -67,7 +47,7 @@ const AllergenManager = ({ menuId, allergens: initialAllergens = [], onAllergens
       const token = localStorage.getItem('token');
       
       // Try different API endpoints
-      const endpoints = ['/allergens', '/api/menu/allergens'];
+      const endpoints = ['/api/allergens', '/menu/allergens'];
       let response = null;
       
       for (const endpoint of endpoints) {
@@ -86,10 +66,9 @@ const AllergenManager = ({ menuId, allergens: initialAllergens = [], onAllergens
       
       if (response?.data) {
         const allergensData = response.data.data || response.data;
-        const updatedAllergens = Array.isArray(allergensData) ? allergensData : [];
-        setAllergens(updatedAllergens);
+        setAllergens(Array.isArray(allergensData) ? allergensData : []);
         if (onAllergensUpdate) {
-          onAllergensUpdate(updatedAllergens);
+          onAllergensUpdate(Array.isArray(allergensData) ? allergensData : []);
         }
       } else {
         // Use default allergens if API is not available
@@ -105,9 +84,6 @@ const AllergenManager = ({ menuId, allergens: initialAllergens = [], onAllergens
       // Use default allergens as fallback
       const defaultAllergens = getDefaultAllergens();
       setAllergens(defaultAllergens);
-      if (onAllergensUpdate) {
-        onAllergensUpdate(defaultAllergens);
-      }
     } finally {
       setLoading(false);
     }
@@ -122,13 +98,7 @@ const AllergenManager = ({ menuId, allergens: initialAllergens = [], onAllergens
       { id: 5, name: 'Peanuts', code: 'E', description: 'Peanuts and peanut products', icon: '🥜', isActive: true },
       { id: 6, name: 'Soybeans', code: 'F', description: 'Soybeans and soy products', icon: '🌱', isActive: true },
       { id: 7, name: 'Milk', code: 'G', description: 'Milk and milk products (including lactose)', icon: '🥛', isActive: true },
-      { id: 8, name: 'Nuts', code: 'H', description: 'Tree nuts (almonds, hazelnuts, walnuts, etc.)', icon: '🌰', isActive: true },
-      { id: 9, name: 'Celery', code: 'I', description: 'Celery and celery products', icon: '🥬', isActive: true },
-      { id: 10, name: 'Mustard', code: 'J', description: 'Mustard and mustard products', icon: '🌭', isActive: true },
-      { id: 11, name: 'Sesame', code: 'K', description: 'Sesame seeds and sesame products', icon: '⚫', isActive: true },
-      { id: 12, name: 'Sulphur dioxide', code: 'L', description: 'Sulphur dioxide and sulphites', icon: '⚗️', isActive: true },
-      { id: 13, name: 'Lupin', code: 'M', description: 'Lupin and lupin products', icon: '🌿', isActive: true },
-      { id: 14, name: 'Molluscs', code: 'N', description: 'Molluscs such as mussels, oysters, squid', icon: '🐚', isActive: true }
+      { id: 8, name: 'Nuts', code: 'H', description: 'Tree nuts (almonds, hazelnuts, walnuts, etc.)', icon: '🌰', isActive: true }
     ];
   };
 
@@ -173,13 +143,9 @@ const AllergenManager = ({ menuId, allergens: initialAllergens = [], onAllergens
         } catch (apiError) {
           console.log('API update failed, updating locally');
           // Update locally if API fails
-          const updatedAllergens = allergens.map(a => 
+          setAllergens(allergens.map(a => 
             a.id === editingAllergen.id ? { ...a, ...formData } : a
-          );
-          setAllergens(updatedAllergens);
-          if (onAllergensUpdate) {
-            onAllergensUpdate(updatedAllergens);
-          }
+          ));
         }
         alert('Allergen updated successfully!');
       } else {
@@ -192,20 +158,12 @@ const AllergenManager = ({ menuId, allergens: initialAllergens = [], onAllergens
             }
           });
           const newAllergen = response.data.data || { id: Date.now(), ...formData, isActive: true };
-          const updatedAllergens = [...allergens, newAllergen];
-          setAllergens(updatedAllergens);
-          if (onAllergensUpdate) {
-            onAllergensUpdate(updatedAllergens);
-          }
+          setAllergens([...allergens, newAllergen]);
         } catch (apiError) {
           console.log('API create failed, creating locally');
           // Create locally if API fails
           const newAllergen = { id: Date.now(), ...formData, isActive: true };
-          const updatedAllergens = [...allergens, newAllergen];
-          setAllergens(updatedAllergens);
-          if (onAllergensUpdate) {
-            onAllergensUpdate(updatedAllergens);
-          }
+          setAllergens([...allergens, newAllergen]);
         }
         alert('Allergen created successfully!');
       }
@@ -250,11 +208,7 @@ const AllergenManager = ({ menuId, allergens: initialAllergens = [], onAllergens
       }
       
       // Remove locally
-      const updatedAllergens = allergens.filter(a => a.id !== allergen.id);
-      setAllergens(updatedAllergens);
-      if (onAllergensUpdate) {
-        onAllergensUpdate(updatedAllergens);
-      }
+      setAllergens(allergens.filter(a => a.id !== allergen.id));
       alert('Allergen deleted successfully!');
     } catch (error) {
       alert(error.response?.data?.error || 'Failed to delete allergen');
@@ -263,13 +217,9 @@ const AllergenManager = ({ menuId, allergens: initialAllergens = [], onAllergens
 
   const toggleActive = (allergen) => {
     const newStatus = !allergen.isActive;
-    const updatedAllergens = allergens.map(a => 
+    setAllergens(allergens.map(a => 
       a.id === allergen.id ? { ...a, isActive: newStatus } : a
-    );
-    setAllergens(updatedAllergens);
-    if (onAllergensUpdate) {
-      onAllergensUpdate(updatedAllergens);
-    }
+    ));
     alert(`Allergen ${newStatus ? 'activated' : 'deactivated'} successfully!`);
   };
 
@@ -315,9 +265,6 @@ const AllergenManager = ({ menuId, allergens: initialAllergens = [], onAllergens
       });
       
       setAllergens(newAllergens);
-      if (onAllergensUpdate) {
-        onAllergensUpdate(newAllergens);
-      }
       alert('Common allergens added!');
     }
   };
@@ -668,495 +615,4 @@ const AllergenManager = ({ menuId, allergens: initialAllergens = [], onAllergens
   );
 };
 
-// ==================== PLACEHOLDER COMPONENTS ====================
-const StyleEditor = () => (
-  <div className="p-6">
-    <div className="text-center py-12">
-      <div className="inline-block p-4 bg-yellow-100 rounded-full mb-4">
-        <span className="text-2xl">🎨</span>
-      </div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Style Editor</h2>
-      <p className="text-gray-600">Customize colors, fonts, and layout of your menu</p>
-      <div className="mt-6 max-w-md mx-auto">
-        <div className="bg-gray-50 border rounded-lg p-4">
-          <h3 className="font-semibold mb-3">Coming Soon Features:</h3>
-          <ul className="text-left space-y-2 text-gray-600">
-            <li>• Color palette customization</li>
-            <li>• Font selection and sizing</li>
-            <li>• Layout templates</li>
-            <li>• Background images</li>
-            <li>• Mobile preview</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-const PDFGenerator = () => (
-  <div className="p-6">
-    <div className="text-center py-12">
-      <div className="inline-block p-4 bg-blue-100 rounded-full mb-4">
-        <span className="text-2xl">📄</span>
-      </div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">PDF Generator</h2>
-      <p className="text-gray-600">Generate and download printable PDF menus</p>
-      <div className="mt-6 max-w-md mx-auto">
-        <div className="bg-gray-50 border rounded-lg p-4">
-          <h3 className="font-semibold mb-3">Coming Soon Features:</h3>
-          <ul className="text-left space-y-2 text-gray-600">
-            <li>• Multiple PDF templates</li>
-            <li>• Custom branding options</li>
-            <li>• Multi-language support</li>
-            <li>• Batch generation</li>
-            <li>• High-resolution export</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-const StatisticsDashboard = () => (
-  <div className="p-6">
-    <div className="text-center py-12">
-      <div className="inline-block p-4 bg-green-100 rounded-full mb-4">
-        <span className="text-2xl">📊</span>
-      </div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Statistics Dashboard</h2>
-      <p className="text-gray-600">View analytics and performance metrics</p>
-      <div className="mt-6 max-w-md mx-auto">
-        <div className="bg-gray-50 border rounded-lg p-4">
-          <h3 className="font-semibold mb-3">Coming Soon Features:</h3>
-          <ul className="text-left space-y-2 text-gray-600">
-            <li>• View count analytics</li>
-            <li>• Popular items tracking</li>
-            <li>• Time-based reports</li>
-            <li>• Export data to CSV</li>
-            <li>• Real-time dashboard</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-const LiveMenuPanel = () => (
-  <div className="p-6">
-    <div className="text-center py-12">
-      <div className="inline-block p-4 bg-purple-100 rounded-full mb-4">
-        <span className="text-2xl">🔗</span>
-      </div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Live Menu</h2>
-      <p className="text-gray-600">Preview and share your live digital menu</p>
-      <div className="mt-6 max-w-md mx-auto">
-        <div className="bg-gray-50 border rounded-lg p-4">
-          <h3 className="font-semibold mb-3">Coming Soon Features:</h3>
-          <ul className="text-left space-y-2 text-gray-600">
-            <li>• Real-time preview</li>
-            <li>• QR code generation</li>
-            <li>• Shareable links</li>
-            <li>• Mobile optimization</li>
-            <li>• Embed codes</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-const OpeningHoursEditor = () => (
-  <div className="p-6">
-    <div className="text-center py-12">
-      <div className="inline-block p-4 bg-orange-100 rounded-full mb-4">
-        <span className="text-2xl">⏰</span>
-      </div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Opening Hours</h2>
-      <p className="text-gray-600">Set and manage your restaurant hours</p>
-      <div className="mt-6 max-w-md mx-auto">
-        <div className="bg-gray-50 border rounded-lg p-4">
-          <h3 className="font-semibold mb-3">Coming Soon Features:</h3>
-          <ul className="text-left space-y-2 text-gray-600">
-            <li>• Weekly schedule editor</li>
-            <li>• Holiday hours</li>
-            <li>• Special events</li>
-            <li>• Timezone support</li>
-            <li>• Auto-closed status</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-const WhatsAppManager = () => (
-  <div className="p-6">
-    <div className="text-center py-12">
-      <div className="inline-block p-4 bg-green-100 rounded-full mb-4">
-        <span className="text-2xl">💬</span>
-      </div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">WhatsApp Integration</h2>
-      <p className="text-gray-600">Manage WhatsApp orders and notifications</p>
-      <div className="mt-6 max-w-md mx-auto">
-        <div className="bg-gray-50 border rounded-lg p-4">
-          <h3 className="font-semibold mb-3">Coming Soon Features:</h3>
-          <ul className="text-left space-y-2 text-gray-600">
-            <li>• Direct ordering via WhatsApp</li>
-            <li>• Auto-replies and templates</li>
-            <li>• Order notifications</li>
-            <li>• Customer messaging</li>
-            <li>• Broadcast messages</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-// ==================== MAIN MENU MANAGEMENT COMPONENT ====================
-const MenuManagement = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  
-  const [activeTab, setActiveTab] = useState('categories');
-  const [menu, setMenu] = useState(null);
-  const [allergens, setAllergens] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedLanguage, setSelectedLanguage] = useState('it');
-  
-  // For menu selector mode
-  const [userMenus, setUserMenus] = useState([]);
-  const [showMenuSelector, setShowMenuSelector] = useState(!id);
-
-  useEffect(() => {
-    if (id) {
-      fetchMenuData();
-    } else {
-      fetchUserMenus();
-    }
-  }, [id]);
-
-  const fetchUserMenus = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get('/api/menus/my-menus', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setUserMenus(response.data.data || []);
-    } catch (error) {
-      console.error('Failed to fetch user menus:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchMenuData = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem('token');
-      
-      const [menuRes, allergensRes] = await Promise.all([
-        axios.get(`/api/menus/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get('/api/allergens', {
-          headers: { Authorization: `Bearer ${token}` }
-        }).catch(() => ({ data: { data: [] } }))
-      ]);
-
-      if (menuRes.data.success) {
-        setMenu(menuRes.data.data);
-        setAllergens(allergensRes.data.data || []);
-      } else {
-        navigate('/dashboard');
-      }
-    } catch (error) {
-      console.error('Failed to load menu data:', error);
-      navigate('/dashboard');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLanguageChange = (language) => {
-    setSelectedLanguage(language);
-    console.log(`Language changed to: ${language}`);
-  };
-
-  const handleMenuUpdate = (updatedData) => {
-    setMenu(prev => ({ ...prev, ...updatedData }));
-  };
-
-  const handleAllergensUpdate = (updatedAllergens) => {
-    setAllergens(updatedAllergens);
-  };
-
-  // Tabs configuration
-  const tabs = [
-    { id: 'categories', label: '📋 Categories & Dishes', icon: '📋' },
-    { id: 'allergens', label: '⚠️ Allergens', icon: '⚠️' },
-    { id: 'style', label: '🎨 Style Editor', icon: '🎨' },
-    { id: 'pdf', label: '📄 PDF Generator', icon: '📄' },
-    { id: 'statistics', label: '📊 Statistics', icon: '📊' },
-    { id: 'live', label: '🔗 Live Menu', icon: '🔗' },
-    { id: 'hours', label: '⏰ Opening Hours', icon: '⏰' },
-    { id: 'whatsapp', label: '💬 WhatsApp', icon: '💬' }
-  ];
-
-  // ==================== RENDER LOGIC ====================
-
-  // Menu Selector Screen
-  if (showMenuSelector) {
-    return (
-      <Layout>
-        <div className="p-6">
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Select a Menu to Manage</h1>
-                <p className="text-gray-600 mt-2">Choose one of your menus to edit</p>
-              </div>
-              <button
-                onClick={() => navigate('/menu/create')}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                <Plus size={18} />
-                Create New Menu
-              </button>
-            </div>
-          </div>
-          
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-            </div>
-          ) : userMenus.length === 0 ? (
-            <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-xl">
-              <div className="inline-block p-4 bg-gray-100 rounded-full mb-4">
-                <span className="text-2xl">📋</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900">No menus yet</h3>
-              <p className="text-gray-600 mt-2">Create your first menu to get started</p>
-              <button
-                onClick={() => navigate('/menu/create')}
-                className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mx-auto"
-              >
-                <Plus size={18} />
-                Create First Menu
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {userMenus.map((menu) => (
-                <div
-                  key={menu.id}
-                  className="bg-white border rounded-xl p-6 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer"
-                  onClick={() => navigate(`/menu/manage/${menu.id}`)}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                      <span className="text-2xl">📋</span>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg">{menu.title}</h3>
-                      <p className="text-gray-600 text-sm mt-1">
-                        Created: {new Date(menu.createdAt).toLocaleDateString()}
-                      </p>
-                      <p className="text-gray-500 text-xs mt-2">
-                        {menu.restaurant?.name || 'No restaurant linked'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex justify-between items-center">
-                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
-                      Active
-                    </span>
-                    <span className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                      Manage →
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </Layout>
-    );
-  }
-
-  // Loading state
-  if (loading) {
-    return (
-      <Layout>
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-        </div>
-      </Layout>
-    );
-  }
-
-  // Error state
-  if (!menu) {
-    return (
-      <Layout>
-        <div className="p-6 text-center">
-          <div className="inline-block p-3 bg-red-100 rounded-full mb-4">
-            <span className="text-2xl">⚠️</span>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-700">Menu not found</h2>
-          <p className="text-gray-600 mt-2">The menu you're looking for doesn't exist or you don't have access.</p>
-          <div className="mt-6 space-x-3">
-            <button
-              onClick={() => navigate('/menu/manage')}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              View All Menus
-            </button>
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
-            >
-              Back to Dashboard
-            </button>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  return (
-    <Layout>
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <div className="bg-white border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{menu.title}</h1>
-                <p className="text-gray-600 text-sm mt-1">
-                  Menu ID: {menu.id} • Created: {new Date(menu.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-              <div className="flex items-center gap-3 flex-wrap">
-                <button
-                  onClick={() => window.open(`/menu/${menu.slug || menu.id}`, '_blank')}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
-                >
-                  <Eye size={16} />
-                  View Live
-                </button>
-                <button
-                  onClick={() => navigate('/menu/manage')}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm"
-                >
-                  ← All Menus
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="bg-white border-b shadow-sm sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto">
-            <nav className="flex space-x-1 overflow-x-auto py-3 px-4">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap flex items-center ${
-                    activeTab === tab.id
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
-                >
-                  <span className="mr-2">{tab.icon}</span>
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Tab Content Header */}
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {tabs.find(t => t.id === activeTab)?.label.replace(/[^\w\s]/g, '')}
-            </h2>
-            <p className="text-gray-600 mt-1">
-              {activeTab === 'categories' && 'Manage categories and menu items'}
-              {activeTab === 'allergens' && 'Configure food allergens for menu items'}
-              {activeTab === 'style' && 'Customize menu appearance'}
-              {activeTab === 'pdf' && 'Generate and download PDF menus'}
-              {activeTab === 'statistics' && 'View menu performance analytics'}
-              {activeTab === 'live' && 'Preview and share live menu'}
-              {activeTab === 'hours' && 'Set and manage opening hours'}
-              {activeTab === 'whatsapp' && 'Configure WhatsApp integration'}
-            </p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-            {activeTab === 'categories' && (
-              <CategoryManager
-                menu={menu}
-                menuId={id}
-                allergens={allergens}
-                onUpdate={fetchMenuData}
-                selectedLanguage={selectedLanguage}
-              />
-            )}
-            
-            {activeTab === 'allergens' && (
-              <AllergenManager
-                menuId={id}
-                allergens={allergens}
-                onAllergensUpdate={handleAllergensUpdate}
-              />
-            )}
-            
-            {activeTab === 'style' && <StyleEditor />}
-            {activeTab === 'pdf' && <PDFGenerator />}
-            {activeTab === 'statistics' && <StatisticsDashboard />}
-            {activeTab === 'live' && <LiveMenuPanel />}
-            {activeTab === 'hours' && <OpeningHoursEditor />}
-            {activeTab === 'whatsapp' && <WhatsAppManager />}
-          </div>
-
-          {/* Quick Actions Footer */}
-          <div className="mt-6 flex flex-wrap gap-3 justify-center">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-            >
-              ← Back to Dashboard
-            </button>
-            <button
-              onClick={() => window.open(`/menu/${menu.slug || menu.id}`, '_blank')}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-            >
-              <Eye size={16} />
-              View Live Menu
-            </button>
-            <button
-              onClick={fetchMenuData}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              <RefreshCw size={16} />
-              Refresh Data
-            </button>
-          </div>
-
-          {/* Status Info */}
-          <div className="mt-6 text-center text-sm text-gray-500">
-            <p>Menu ID: {menu.id} • Created: {new Date(menu.createdAt).toLocaleDateString()} • Status: <span className="font-medium text-green-600">Active</span></p>
-          </div>
-        </div>
-      </div>
-    </Layout>
-  );
-};
-
-export default MenuManagement;
+export default AllergenManager;

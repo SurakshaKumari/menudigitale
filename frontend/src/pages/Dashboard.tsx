@@ -40,8 +40,16 @@ const navigate = useNavigate();
       icon: Menu, 
       color: 'text-[#0A0C0B]', 
       bgColor: 'bg-[#0A0C0B]/5', 
-      path: '/menu/create' 
+      path: '/menus/create' 
     },
+      { 
+    title: 'Manage Menu', // or use translation key
+    description: 'Edit categories, items, and allergens',
+    icon: FileText, // Or use a different icon like Settings, Grid, List
+    color: 'text-[#7BD5B5]', 
+    bgColor: 'bg-[#7BD5B5]/5', 
+    path: '/menus'
+  },
     { 
       title: t('dashboard.actions.generate_pdf'), // Translated
       description: t('dashboard.actions.generate_pdf_desc'), // Translated
